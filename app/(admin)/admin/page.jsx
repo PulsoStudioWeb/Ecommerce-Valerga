@@ -156,7 +156,7 @@ export default async function AdminDashboard() {
 
         {recentOrders.length === 0 ? (
           <div className="p-8 text-center text-gray-400">
-            No hay pedidos todavia
+            No hay pedidos todavia.
           </div>
         ) : (
           <div className="divide-y divide-gray-50">
