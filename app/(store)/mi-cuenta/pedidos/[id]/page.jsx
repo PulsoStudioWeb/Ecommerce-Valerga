@@ -48,12 +48,15 @@ export default function PedidoDetallePage() {
       setOrder(data);
       setLoading(false);
     }
-    fetchOrder();
+    if (id) fetchOrder();
   }, [id]);
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center text-gray-400">
+      <div
+        className="max-w-2xl mx-auto px-4 py-16 text-center"
+        style={{ color: "#78716C" }}
+      >
         Cargando...
       </div>
     );
@@ -62,9 +65,15 @@ export default function PedidoDetallePage() {
   if (!order) {
     return (
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-        <p className="text-2xl font-bold mb-2">Pedido no encontrado</p>
-        <Link href="/" className="text-gray-500 hover:text-black text-sm">
-          Volver al inicio
+        <p className="text-2xl font-black mb-2" style={{ color: "#1C1917" }}>
+          Pedido no encontrado
+        </p>
+        <Link
+          href="/mi-cuenta/pedidos"
+          className="text-sm hover:underline"
+          style={{ color: "#F97316" }}
+        >
+          Volver a mis pedidos
         </Link>
       </div>
     );
@@ -74,12 +83,11 @@ export default function PedidoDetallePage() {
   const orderNumber = "#" + String(order.order_number).padStart(5, "0");
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Confirmacion nueva */}
+    <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
       {isNew && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-5 mb-6 text-center">
+        <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
           <p className="text-3xl mb-2">✅</p>
-          <h1 className="text-xl font-bold text-green-800 mb-1">
+          <h1 className="text-xl font-black text-green-800 mb-1">
             Pedido recibido
           </h1>
           <p className="text-green-700 text-sm">
@@ -89,93 +97,119 @@ export default function PedidoDetallePage() {
         </div>
       )}
 
-      {/* Header del pedido */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xl font-bold">{orderNumber}</h2>
+      <div
+        className="bg-white border rounded-xl p-5"
+        style={{ borderColor: "#E7E5E4" }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xl font-black" style={{ color: "#1C1917" }}>
+            {orderNumber}
+          </h2>
           <span
             className={`text-sm px-3 py-1 rounded-full font-medium ${status.color}`}
           >
             {status.label}
           </span>
         </div>
-        <p className="text-sm text-gray-500">
-          {new Date(order.created_at).toLocaleDateString("es-AR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+        <p className="text-sm" style={{ color: "#78716C" }}>
+          {new Date(order.created_at).toLocaleDateString("es-AR")}
         </p>
       </div>
 
-      {/* Items */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
-        <h3 className="font-semibold mb-3">Productos</h3>
+      <div
+        className="bg-white border rounded-xl p-5"
+        style={{ borderColor: "#E7E5E4" }}
+      >
+        <h3 className="font-bold mb-3" style={{ color: "#1C1917" }}>
+          Productos
+        </h3>
         <div className="space-y-3">
           {order.items.map((item, i) => (
             <div key={i} className="flex justify-between text-sm">
               <div>
-                <p className="font-medium">{item.name}</p>
-                <p className="text-gray-400">
+                <p className="font-medium" style={{ color: "#1C1917" }}>
+                  {item.name}
+                </p>
+                <p style={{ color: "#78716C" }}>
                   {item.qty} x {formatPrice(item.unit_price)}
                 </p>
               </div>
-              <p className="font-medium">{formatPrice(item.subtotal)}</p>
+              <p className="font-bold" style={{ color: "#1C1917" }}>
+                {formatPrice(item.subtotal)}
+              </p>
             </div>
           ))}
         </div>
-        <div className="border-t border-gray-100 pt-3 mt-3">
-          <div className="flex justify-between font-bold">
-            <span>Total estimado</span>
-            <span>{formatPrice(order.total)}</span>
-          </div>
+        <div
+          className="border-t pt-3 mt-3 flex justify-between font-black"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          <span style={{ color: "#1C1917" }}>Total estimado</span>
+          <span style={{ color: "#F97316" }}>{formatPrice(order.total)}</span>
         </div>
       </div>
 
-      {/* Entrega */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
-        <h3 className="font-semibold mb-3">Entrega y pago</h3>
-        <div className="space-y-1 text-sm text-gray-600">
+      <div
+        className="bg-white border rounded-xl p-5"
+        style={{ borderColor: "#E7E5E4" }}
+      >
+        <h3 className="font-bold mb-3" style={{ color: "#1C1917" }}>
+          Entrega y pago
+        </h3>
+        <div className="space-y-1 text-sm" style={{ color: "#78716C" }}>
           <p>
-            <span className="font-medium">Tipo:</span>{" "}
+            <span className="font-medium" style={{ color: "#1C1917" }}>
+              Tipo:
+            </span>{" "}
             {order.delivery_type === "pickup" ? "Retiro en local" : "Delivery"}
           </p>
           {order.delivery_address?.street && (
             <p>
-              <span className="font-medium">Direccion:</span>{" "}
+              <span className="font-medium" style={{ color: "#1C1917" }}>
+                Direccion:
+              </span>{" "}
               {order.delivery_address.street}
             </p>
           )}
           <p>
-            <span className="font-medium">Pago:</span>{" "}
+            <span className="font-medium" style={{ color: "#1C1917" }}>
+              Pago:
+            </span>{" "}
             {order.payment_method === "cash"
               ? "Efectivo"
               : order.payment_method === "transfer"
                 ? "Transferencia"
-                : "Tarjeta al momento"}
+                : "Tarjeta"}
           </p>
         </div>
       </div>
 
       {order.customer_notes && (
-        <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
-          <h3 className="font-semibold mb-2">Notas</h3>
-          <p className="text-sm text-gray-600">{order.customer_notes}</p>
+        <div
+          className="bg-white border rounded-xl p-5"
+          style={{ borderColor: "#E7E5E4" }}
+        >
+          <h3 className="font-bold mb-2" style={{ color: "#1C1917" }}>
+            Notas
+          </h3>
+          <p className="text-sm" style={{ color: "#78716C" }}>
+            {order.customer_notes}
+          </p>
         </div>
       )}
 
       <div className="flex gap-3">
         <Link
           href="/mi-cuenta/pedidos"
-          className="flex-1 text-center border border-gray-300 py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          className="flex-1 text-center border py-3 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
+          style={{ borderColor: "#E7E5E4", color: "#1C1917" }}
         >
           Mis pedidos
         </Link>
         <Link
           href="/"
-          className="flex-1 text-center bg-black text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-800 transition-colors"
+          className="flex-1 text-center py-3 rounded-xl text-sm font-bold text-white transition-colors hover:opacity-90"
+          style={{ backgroundColor: "#F97316" }}
         >
           Seguir comprando
         </Link>
