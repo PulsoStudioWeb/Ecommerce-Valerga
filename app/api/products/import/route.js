@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase/admin";
+import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import Papa from "papaparse";
 
-// Tamaño del chunk para no romper los límites de Supabase
 const CHUNK_SIZE = 500;
 
 function slugify(text) {
@@ -19,13 +18,13 @@ function validateRow(row, index) {
   const errors = [];
 
   if (!row.sku?.trim()) {
-    errors.push(`Fila ${index + 2}: SKU es obligatorio`);
+    errors.push("Fila " + (index + 2) + ": SKU es obligatorio");
   }
-  if (!row.name?.trim()) {
-    errors.push(`Fila ${index + 2}: Nombre es obligatorio`);
+  if (!row.nombre?.trim()) {
+    errors.push("Fila " + (index + 2) + ": Nombre es obligatorio");
   }
-  if (!row.price || isNaN(Number(row.price))) {
-    errors.push(`Fila ${index + 2}: Precio inválido`);
+  if (!row.precio || isNaN(Number(row.precio))) {
+    errors.push("Fila " + (index + 2) + ": Precio invalido");
   }
 
   return errors;
@@ -36,12 +35,12 @@ async function getOrCreateCategory(name, categoryCache) {
 
   const normalized = name.trim();
 
-  // Ya lo tenemos en cache
   if (categoryCache.has(normalized)) {
     return categoryCache.get(normalized);
   }
 
-  // Buscar en la base de datos
+  const supabaseAdmin = getSupabaseAdmin();
+
   const { data: existing } = await supabaseAdmin
     .from("categories")
     .select("id")
@@ -53,7 +52,6 @@ async function getOrCreateCategory(name, categoryCache) {
     return existing.id;
   }
 
-  // Crear la categoría si no existe
   const { data: created } = await supabaseAdmin
     .from("categories")
     .insert({ name: normalized, slug: slugify(normalized) })
@@ -68,9 +66,9 @@ async function getOrCreateCategory(name, categoryCache) {
   return null;
 }
 
-// Inserta en chunks para no saturar Supabase
 async function insertInChunks(products) {
   const results = { inserted: 0, updated: 0, errors: [] };
+  const supabaseAdmin = getSupabaseAdmin();
 
   for (let i = 0; i < products.length; i += CHUNK_SIZE) {
     const chunk = products.slice(i, i + CHUNK_SIZE);
@@ -78,14 +76,14 @@ async function insertInChunks(products) {
     const { data, error } = await supabaseAdmin
       .from("products")
       .upsert(chunk, {
-        onConflict: "sku", // si el SKU ya existe, actualiza
+        onConflict: "sku",
         ignoreDuplicates: false,
       })
       .select("id");
 
     if (error) {
       results.errors.push(
-        `Chunk ${Math.floor(i / CHUNK_SIZE) + 1}: ${error.message}`,
+        "Chunk " + (Math.floor(i / CHUNK_SIZE) + 1) + ": " + error.message,
       );
     } else {
       results.inserted += data?.length ?? 0;
@@ -102,14 +100,13 @@ export async function POST(request) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "No se recibió ningún archivo" },
+        { error: "No se recibio ningun archivo" },
         { status: 400 },
       );
     }
 
     const text = await file.text();
 
-    // Parsear CSV
     const { data: rows, errors: parseErrors } = Papa.parse(text, {
       header: true,
       skipEmptyLines: true,
@@ -128,12 +125,11 @@ export async function POST(request) {
 
     if (rows.length === 0) {
       return NextResponse.json(
-        { error: "El archivo está vacío" },
+        { error: "El archivo esta vacio" },
         { status: 400 },
       );
     }
 
-    // Validar todas las filas antes de insertar
     const validationErrors = [];
     rows.forEach((row, index) => {
       const errors = validateRow(row, index);
@@ -143,54 +139,51 @@ export async function POST(request) {
     if (validationErrors.length > 0) {
       return NextResponse.json(
         {
-          error: "Errores de validación",
-          details: validationErrors.slice(0, 20), // máximo 20 errores para no saturar
+          error: "Errores de validacion",
+          details: validationErrors.slice(0, 20),
           total_errors: validationErrors.length,
         },
         { status: 400 },
       );
     }
 
-    // Cache de categorías para no hacer una query por cada fila
     const categoryCache = new Map();
 
-    // Preparar productos para insertar
     const products = await Promise.all(
       rows.map(async (row) => {
         const categoryId = await getOrCreateCategory(
-          row.category,
+          row.categoria,
           categoryCache,
         );
 
         return {
           sku: row.sku.trim(),
-          name: row.name.trim(),
-          slug: slugify(row.name.trim()),
-          price: Number(row.price),
-          compare_price: row.compare_price ? Number(row.compare_price) : null,
+          name: row.nombre.trim(),
+          slug: slugify(row.nombre.trim()),
+          price: Number(row.precio),
+          compare_price: row.precio_tachado ? Number(row.precio_tachado) : null,
           category_id: categoryId,
-          brand: row.brand?.trim() || null,
-          description: row.description?.trim() || null,
-          barcode: row.barcode?.trim() || null,
-          unit: row.unit?.trim() || "unidad",
-          is_active: row.is_active === "0" ? false : true,
+          brand: row.marca?.trim() || null,
+          description: row.descripcion?.trim() || null,
+          barcode: row.codigo_barras?.trim() || null,
+          unit: row.unidad?.trim() || "unidad",
+          is_active: row.activo === "0" ? false : true,
           images: [],
         };
       }),
     );
 
-    // Insertar en chunks
     const results = await insertInChunks(products);
 
     return NextResponse.json({
       success: true,
-      message: `Importación completada`,
+      message: "Importacion completada",
       inserted: results.inserted,
       total_rows: rows.length,
       errors: results.errors,
     });
   } catch (error) {
-    console.error("Error en importación:", error);
+    console.error("Error en importacion:", error);
     return NextResponse.json(
       {
         error: "Error interno del servidor",

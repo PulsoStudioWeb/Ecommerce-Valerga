@@ -67,7 +67,7 @@ export default function OrderReviewPanel({ order }) {
   const status = STATUS_LABELS[order.status];
   const orderNumber = "#" + String(order.order_number).padStart(5, "0");
   const nextStatuses = NEXT_STATUSES[order.status] ?? [];
-
+  const [noteSaved, setNoteSaved] = useState(false);
   function updateItemQty(index, newQty) {
     setItems((prev) =>
       prev.map((item, i) =>
@@ -104,38 +104,53 @@ export default function OrderReviewPanel({ order }) {
       item.adjusted_qty !== item.qty,
   );
 
+  async function handleSaveNotes() {
+    setLoading(true);
+    setError("");
+
+    const supabase = createClient();
+
+    const { error: updateError } = await supabase
+      .from("orders")
+      .update({
+        operator_notes: operatorNotes || null,
+      })
+      .eq("id", order.id);
+
+    if (updateError) {
+      setError("Error al guardar notas");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    setNoteSaved(true);
+    setTimeout(() => setNoteSaved(false), 2000);
+  }
   async function handleStatusChange(newStatus) {
     setLoading(true);
     setError("");
 
     const supabase = createClient();
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    console.log("sesion:", session?.user?.email ?? "SIN SESION");
-
-    if (!session) {
-      setError("No hay sesion activa");
-      setLoading(false);
-      return;
-    }
-
     const finalStatus =
       wasModified && newStatus === "validated" ? "modified" : newStatus;
 
-    console.log("actualizando orden:", order.id, "nuevo status:", finalStatus);
-
-    const { data, error: updateError } = await supabase
+    const { error: updateError } = await supabase
       .from("orders")
-      .update({ status: finalStatus })
-      .eq("id", order.id)
-      .select();
-
-    console.log("resultado:", { data, updateError });
+      .update({
+        status: finalStatus,
+        items: items,
+        total: totalAjustado,
+        operator_notes: operatorNotes || null,
+        modification_notes: wasModified ? modificationNotes : null,
+        was_modified: wasModified,
+        reviewed_at: new Date().toISOString(),
+      })
+      .eq("id", order.id);
 
     if (updateError) {
-      setError("Error: " + updateError.message);
+      setError("Error al actualizar el pedido");
       setLoading(false);
       return;
     }
@@ -158,13 +173,7 @@ export default function OrderReviewPanel({ order }) {
             </span>
           </div>
           <p className="text-gray-500 text-sm">
-            {new Date(order.created_at).toLocaleDateString("es-AR", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            {new Date(order.created_at).toLocaleDateString("es-AR")}
           </p>
         </div>
         <a
@@ -297,6 +306,14 @@ export default function OrderReviewPanel({ order }) {
               rows={2}
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-black resize-none"
             />
+            <button
+              type="button"
+              onClick={handleSaveNotes}
+              disabled={loading}
+              className="mt-2 px-4 py-2 rounded-lg text-sm font-medium border border-gray-300 hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              {noteSaved ? "Guardado" : "Guardar nota"}
+            </button>
           </div>
         </div>
 

@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useCartContext } from "@/components/store/CartProvider";
-import { ShoppingCart, Search, User, Menu, X } from "lucide-react";
+import { ShoppingCart, Search, User } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Header() {
   const { itemCount } = useCartContext();
   const [search, setSearch] = useState("");
-  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
   function handleSearch(e) {
@@ -19,36 +18,36 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header
+      className="bg-white border-b sticky top-0 z-50"
+      style={{ borderColor: "#E7E5E4" }}
+    >
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center gap-4 h-16">
           {/* Logo */}
-          <Link href="/" className="shrink-0 flex items-center gap-2">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{ backgroundColor: "#F97316" }}
-            >
-              <span className="text-white font-black text-sm">H</span>
-            </div>
-            <div className="hidden sm:block">
-              <p
-                className="font-black text-base leading-none"
-                style={{ color: "#1C1917" }}
+          <Link href="/" className="shrink-0 flex items-center">
+            <div className="flex items-baseline gap-0.5">
+              <span
+                className="font-black text-2xl tracking-tight leading-none"
+                style={{ color: "#F97316" }}
               >
-                Horizonte
-              </p>
-              <p className="text-xs leading-none" style={{ color: "#78716C" }}>
-                Supermercados
-              </p>
+                horizonte
+              </span>
+              <span
+                className="hidden sm:inline text-xs font-semibold ml-1.5 px-1.5 py-0.5 rounded"
+                style={{ backgroundColor: "#FFF7ED", color: "#EA580C" }}
+              >
+                super
+              </span>
             </div>
           </Link>
 
           {/* Buscador */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-2xl">
+          <form onSubmit={handleSearch} className="flex-1">
             <div className="relative">
               <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2"
+                size={15}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ color: "#78716C" }}
               />
               <input
@@ -56,11 +55,10 @@ export default function Header() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Busca productos, marcas..."
-                className="w-full pl-9 pr-4 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 transition-all"
-                style={{
-                  borderColor: "#E7E5E4",
-                  "--tw-ring-color": "#F97316",
-                }}
+                className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border-2 focus:outline-none transition-colors"
+                style={{ borderColor: "#E7E5E4", backgroundColor: "#F9F8F7" }}
+                onFocus={(e) => (e.target.style.borderColor = "#F97316")}
+                onBlur={(e) => (e.target.style.borderColor = "#E7E5E4")}
               />
             </div>
           </form>
@@ -69,24 +67,24 @@ export default function Header() {
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/mi-cuenta"
-              className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl hover:bg-orange-50 transition-colors"
+              className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl transition-colors hover:bg-gray-100"
               style={{ color: "#78716C" }}
             >
               <User size={18} />
-              <span className="hidden sm:inline font-medium">Mi cuenta</span>
+              <span className="hidden md:inline font-medium">Mi cuenta</span>
             </Link>
 
             <Link
               href="/carrito"
-              className="relative flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-xl transition-colors text-white"
+              className="relative flex items-center gap-2 text-sm font-bold px-4 py-2 rounded-xl text-white transition-colors hover:opacity-90"
               style={{ backgroundColor: "#F97316" }}
             >
               <ShoppingCart size={18} />
               <span className="hidden sm:inline">Carrito</span>
               {itemCount > 0 && (
                 <span
-                  className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
-                  style={{ backgroundColor: "#EA580C" }}
+                  className="absolute -top-1.5 -right-1.5 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-black"
+                  style={{ backgroundColor: "#1C1917" }}
                 >
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
