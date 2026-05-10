@@ -27,13 +27,15 @@ export async function POST(request) {
     // Enviar email de confirmacion
     // Enviar email — si falla no interrumpe el pedido
     try {
-      await sendOrderConfirmation({
+      console.log("Intentando enviar email a:", body.customer_snapshot.email);
+      const emailResult = await sendOrderConfirmation({
         order,
         customerEmail: body.customer_snapshot.email,
         customerName: body.customer_snapshot.name,
       });
+      console.log("Resultado email:", emailResult);
     } catch (emailError) {
-      console.error("Error enviando email:", emailError);
+      console.error("Error enviando email:", emailError.message);
     }
 
     return NextResponse.json({ success: true, order });
