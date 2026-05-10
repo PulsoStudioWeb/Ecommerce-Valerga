@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 
 export default async function AdminLayout({ children }) {
@@ -9,9 +9,7 @@ export default async function AdminLayout({ children }) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
-    redirect("/auth/login");
-  }
+  if (!user) redirect("/auth/login");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -26,7 +24,9 @@ export default async function AdminLayout({ children }) {
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar profile={profile} />
-      <main className="flex-1 ml-64 p-8">{children}</main>
+      <main className="flex-1 lg:ml-64 p-4 lg:p-8 pt-16 lg:pt-8">
+        {children}
+      </main>
     </div>
   );
 }

@@ -126,7 +126,7 @@ export default async function AdminDashboard() {
         <p className="text-gray-500 mt-1">Resumen del dia</p>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card) => (
           <div
             key={card.label}
