@@ -135,6 +135,15 @@ export default function OrderReviewPanel({ order }) {
 
     const finalStatus =
       wasModified && newStatus === "validated" ? "modified" : newStatus;
+    // Enviar email de cambio de estado
+    await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        order_id: order.id,
+        new_status: finalStatus,
+      }),
+    });
 
     const { error: updateError } = await supabase
       .from("orders")
