@@ -4,8 +4,8 @@ import "./globals.css";
 const geist = Geist({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Valerga",
-  description: "Supermercado Valerga - Mercedes",
+  title: "Horizonte Supermercados",
+  description: "Tu supermercado online en Mercedes",
 };
 
 export default function RootLayout({ children }) {

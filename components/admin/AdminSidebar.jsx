@@ -110,7 +110,7 @@ export default function AdminSidebar({ profile }) {
         <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">
           Panel Admin
         </p>
-        <p className="font-bold text-lg">Valerga</p>
+        <p className="font-bold text-lg">Horizonte</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
