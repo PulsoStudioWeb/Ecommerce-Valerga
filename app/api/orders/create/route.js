@@ -25,11 +25,16 @@ export async function POST(request) {
     }
 
     // Enviar email de confirmacion
-    await sendOrderConfirmation({
-      order,
-      customerEmail: body.customer_snapshot.email,
-      customerName: body.customer_snapshot.name,
-    });
+    // Enviar email — si falla no interrumpe el pedido
+    try {
+      await sendOrderConfirmation({
+        order,
+        customerEmail: body.customer_snapshot.email,
+        customerName: body.customer_snapshot.name,
+      });
+    } catch (emailError) {
+      console.error("Error enviando email:", emailError);
+    }
 
     return NextResponse.json({ success: true, order });
   } catch (error) {
